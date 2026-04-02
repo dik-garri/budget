@@ -36,7 +36,7 @@ const UI = (() => {
       return;
     }
 
-    const sorted = [...transactions].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+    const sorted = [...transactions].sort((a, b) => b.date.localeCompare(a.date) || (b.rowNum || 0) - (a.rowNum || 0));
     const items = options.limit ? sorted.slice(0, options.limit) : sorted;
 
     let currentDate = '';

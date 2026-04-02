@@ -58,7 +58,8 @@ function getTransactions(month, user) {
     filtered = filtered.filter(row => row[5] === user);
   }
 
-  const transactions = filtered.map(row => ({
+  const transactions = filtered.map((row, idx) => ({
+    rowNum: idx,
     id: row[0],
     date: formatDate(row[1]),
     amount: row[2],
