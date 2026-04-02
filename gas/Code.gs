@@ -151,6 +151,9 @@ function doPost(e) {
       case 'editTransaction':
         result = editTransaction(body);
         break;
+      case 'addCategory':
+        result = addCategory(body);
+        break;
       case 'deleteTransaction':
         result = deleteTransaction(body.id);
         break;
@@ -163,6 +166,12 @@ function doPost(e) {
 
   return ContentService.createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function addCategory(body) {
+  var sheet = getSheet('Categories');
+  sheet.appendRow([body.name, body.type, body.icon || '📁']);
+  return { status: 'ok' };
 }
 
 function editTransaction(body) {

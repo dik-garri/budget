@@ -82,7 +82,7 @@ const UI = (() => {
     });
   }
 
-  function renderCategoryGrid(container, categories, onSelect) {
+  function renderCategoryGrid(container, categories, onSelect, onAdd) {
     container.innerHTML = '';
     let selectedEl = null;
 
@@ -98,6 +98,15 @@ const UI = (() => {
       });
       container.appendChild(btn);
     });
+
+    // Add "+" button
+    if (onAdd) {
+      const addBtn = document.createElement('button');
+      addBtn.className = 'category-grid__item category-grid__item--add';
+      addBtn.innerHTML = '<span class="category-grid__icon">+</span><span class="category-grid__label">Новая</span>';
+      addBtn.addEventListener('click', onAdd);
+      container.appendChild(addBtn);
+    }
   }
 
   function renderUserSelect(selectEl, users, current) {

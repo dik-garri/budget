@@ -109,6 +109,24 @@
       </div>
     </div>
 
+    <!-- Add Category Dialog -->
+    <div id="category-dialog" class="dialog">
+      <div class="dialog__overlay"></div>
+      <div class="dialog__content">
+        <h3 class="dialog__title">Новая категория</h3>
+        <div class="form-group">
+          <input id="cat-icon" type="text" class="input-comment" placeholder="Иконка (эмодзи)" maxlength="4">
+        </div>
+        <div class="form-group">
+          <input id="cat-name" type="text" class="input-comment" placeholder="Название" maxlength="30">
+        </div>
+        <div class="dialog__buttons">
+          <button id="cat-cancel" class="dialog__btn dialog__btn--cancel">Отмена</button>
+          <button id="cat-save" class="dialog__btn dialog__btn--save">Добавить</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay">
       <div class="loading-spinner"></div>

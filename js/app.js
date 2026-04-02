@@ -133,7 +133,7 @@ const App = (() => {
     const filtered = categories.filter(c => c.type === type);
     UI.renderCategoryGrid(document.getElementById('category-grid'), filtered, (name) => {
       selectedCategory = name;
-    });
+    }, () => openCategoryDialog(type));
 
     // Pre-select category if editing
     if (editTx) {
@@ -157,6 +157,60 @@ const App = (() => {
 
   function closeSheet() {
     document.getElementById('bottom-sheet').classList.remove('active');
+  }
+
+  // --- Add category dialog ---
+  function openCategoryDialog(type) {
+    document.getElementById('cat-icon').value = '';
+    document.getElementById('cat-name').value = '';
+    const dialog = document.getElementById('category-dialog');
+    dialog.classList.add('active');
+    dialog.dataset.type = type;
+    setTimeout(() => document.getElementById('cat-icon').focus(), 200);
+  }
+
+  function closeCategoryDialog() {
+    document.getElementById('category-dialog').classList.remove('active');
+  }
+
+  async function saveCategory() {
+    const dialog = document.getElementById('category-dialog');
+    const icon = document.getElementById('cat-icon').value.trim() || '📁';
+    const name = document.getElementById('cat-name').value.trim();
+    if (!name) {
+      UI.showToast('Введите название');
+      return;
+    }
+
+    const type = dialog.dataset.type;
+    const btn = document.getElementById('cat-save');
+    btn.disabled = true;
+    btn.textContent = '...';
+
+    try {
+      await API.addCategory({ name, type, icon });
+      categories.push({ name, type, icon });
+      categoryMap[name] = { name, type, icon };
+      closeCategoryDialog();
+      // Re-render category grid in the open bottom sheet
+      const filtered = categories.filter(c => c.type === type);
+      UI.renderCategoryGrid(document.getElementById('category-grid'), filtered, (n) => {
+        selectedCategory = n;
+      }, () => openCategoryDialog(type));
+      // Auto-select the new category
+      selectedCategory = name;
+      const gridItems = document.querySelectorAll('.category-grid__item');
+      gridItems.forEach(b => {
+        const label = b.querySelector('.category-grid__label');
+        if (label && label.textContent === name) b.classList.add('selected');
+      });
+      UI.showToast('Категория добавлена');
+    } catch (err) {
+      UI.showToast('Ошибка: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Добавить';
+    }
   }
 
   async function submitTransaction() {
@@ -262,6 +316,11 @@ const App = (() => {
     // Bottom sheet
     document.querySelector('.bottom-sheet__overlay').addEventListener('click', closeSheet);
     document.getElementById('btn-submit').addEventListener('click', submitTransaction);
+
+    // Category dialog
+    document.querySelector('.dialog__overlay').addEventListener('click', closeCategoryDialog);
+    document.getElementById('cat-cancel').addEventListener('click', closeCategoryDialog);
+    document.getElementById('cat-save').addEventListener('click', saveCategory);
 
     // User select
     document.getElementById('user-select').addEventListener('change', (e) => {
