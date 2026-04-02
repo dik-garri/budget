@@ -331,6 +331,7 @@ body {
    Transaction Item — Expandable Actions
    ============================================================ */
 .transaction-item__actions {
+  display: flex;
   max-height: 0;
   overflow: hidden;
   transition: max-height 200ms ease-out;
@@ -340,20 +341,29 @@ body {
   max-height: 48px;
 }
 
-/* ============================================================
-   Delete Button
-   ============================================================ */
+.btn-edit,
 .btn-delete {
-  display: block;
-  width: 100%;
+  flex: 1;
   padding: 12px;
   border: none;
-  background-color: #fef2f2;
-  color: var(--color-expense);
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
+}
+
+.btn-edit {
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+
+.btn-edit:active {
+  background-color: #dbeafe;
+}
+
+.btn-delete {
+  background-color: #fef2f2;
+  color: var(--color-expense);
   text-align: center;
   min-height: 44px;
   transition: background-color 150ms;

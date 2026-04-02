@@ -67,6 +67,7 @@ const UI = (() => {
           <span class="transaction-item__amount ${colorClass}">${sign}${formatMoney(tx.amount)}</span>
         </div>
         <div class="transaction-item__actions">
+          <button class="btn-edit" data-id="${tx.id}">Редактировать</button>
           <button class="btn-delete" data-id="${tx.id}">Удалить</button>
         </div>
       `;

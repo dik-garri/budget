@@ -148,6 +148,9 @@ function doPost(e) {
       case 'addTransaction':
         result = addTransaction(body);
         break;
+      case 'editTransaction':
+        result = editTransaction(body);
+        break;
       case 'deleteTransaction':
         result = deleteTransaction(body.id);
         break;
@@ -160,6 +163,32 @@ function doPost(e) {
 
   return ContentService.createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function editTransaction(body) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(5000);
+  try {
+    var sheet = getSheet('Transactions');
+    var data = sheet.getDataRange().getValues();
+
+    for (var i = 1; i < data.length; i++) {
+      if (data[i][0] === body.id) {
+        var row = i + 1;
+        sheet.getRange(row, 2).setValue(body.date);
+        sheet.getRange(row, 3).setValue(Number(body.amount));
+        sheet.getRange(row, 4).setValue(body.type);
+        sheet.getRange(row, 5).setValue(body.category);
+        sheet.getRange(row, 6).setValue(body.user);
+        sheet.getRange(row, 7).setValue((body.comment || '').substring(0, 100));
+        return { status: 'ok' };
+      }
+    }
+
+    return { status: 'error', message: 'Transaction not found' };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function addTransaction(body) {

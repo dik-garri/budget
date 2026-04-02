@@ -9,6 +9,7 @@ const App = (() => {
   let categoryMap = {};
   let sheetType = '';
   let selectedCategory = '';
+  let editingTxId = null;
 
   // --- Tab routing ---
   function switchTab(tab) {
@@ -101,6 +102,7 @@ const App = (() => {
       filtered = filtered.filter(tx => tx.user === userFilter);
     }
     UI.renderTransactionList(list, filtered, categoryMap, { expandable: true });
+    bindEditButtons(list);
     bindDeleteButtons(list);
   }
 
@@ -116,20 +118,38 @@ const App = (() => {
   }
 
   // --- Bottom sheet ---
-  function openSheet(type) {
+  function openSheet(type, editTx) {
     sheetType = type;
-    selectedCategory = '';
+    selectedCategory = editTx ? editTx.category : '';
+    editingTxId = editTx ? editTx.id : null;
     const sheet = document.getElementById('bottom-sheet');
-    document.getElementById('sheet-title').textContent = type === 'income' ? 'Новый доход' : 'Новый расход';
+
+    if (editTx) {
+      document.getElementById('sheet-title').textContent = 'Редактировать';
+    } else {
+      document.getElementById('sheet-title').textContent = type === 'income' ? 'Новый доход' : 'Новый расход';
+    }
 
     const filtered = categories.filter(c => c.type === type);
     UI.renderCategoryGrid(document.getElementById('category-grid'), filtered, (name) => {
       selectedCategory = name;
     });
 
-    document.getElementById('input-amount').value = '';
-    document.getElementById('input-comment').value = '';
-    document.getElementById('input-date').value = new Date().toISOString().slice(0, 10);
+    // Pre-select category if editing
+    if (editTx) {
+      const gridItems = document.querySelectorAll('.category-grid__item');
+      gridItems.forEach(btn => {
+        if (btn.querySelector('.category-grid__label').textContent === editTx.category) {
+          btn.classList.add('selected');
+        }
+      });
+    }
+
+    document.getElementById('input-amount').value = editTx ? editTx.amount : '';
+    document.getElementById('input-comment').value = editTx ? editTx.comment : '';
+    document.getElementById('input-date').value = editTx ? editTx.date : new Date().toISOString().slice(0, 10);
+
+    document.getElementById('btn-submit').textContent = editTx ? 'Сохранить' : 'Добавить';
 
     sheet.classList.add('active');
     setTimeout(() => document.getElementById('input-amount').focus(), 300);
@@ -151,7 +171,7 @@ const App = (() => {
     }
 
     const tx = {
-      id: API.generateId(),
+      id: editingTxId || API.generateId(),
       date: document.getElementById('input-date').value,
       amount: amount,
       type: sheetType,
@@ -165,9 +185,13 @@ const App = (() => {
     btn.textContent = '...';
 
     try {
-      await API.addTransaction(tx);
+      if (editingTxId) {
+        await API.editTransaction(tx);
+      } else {
+        await API.addTransaction(tx);
+      }
       closeSheet();
-      UI.showToast('Добавлено!');
+      UI.showToast(editingTxId ? 'Сохранено!' : 'Добавлено!');
       switchTab(currentTab);
     } catch (err) {
       UI.showToast('Ошибка: ' + err.message);
@@ -175,6 +199,18 @@ const App = (() => {
       btn.disabled = false;
       btn.textContent = 'Добавить';
     }
+  }
+
+  // --- Edit ---
+  function bindEditButtons(container) {
+    container.querySelectorAll('.btn-edit').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        const tx = transactions.find(t => t.id === id);
+        if (tx) openSheet(tx.type, tx);
+      });
+    });
   }
 
   // --- Delete ---

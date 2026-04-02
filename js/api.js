@@ -47,6 +47,7 @@ const API = (() => {
     getUsers: () => get({ action: 'users' }),
     getSummary: (months, user) => get({ action: 'summary', months: months || 6, user: user || 'all' }),
     addTransaction: (tx) => post({ action: 'addTransaction', ...tx }),
+    editTransaction: (tx) => post({ action: 'editTransaction', ...tx }),
     deleteTransaction: (id) => post({ action: 'deleteTransaction', id })
   };
 })();
