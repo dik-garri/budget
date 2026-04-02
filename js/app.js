@@ -45,14 +45,19 @@ const App = (() => {
       await loadHome();
     } catch (err) {
       UI.showToast('Ошибка загрузки: ' + err.message);
+    } finally {
+      const overlay = document.getElementById('loading-overlay');
+      overlay.classList.add('hidden');
+      setTimeout(() => overlay.remove(), 300);
     }
   }
 
   async function loadHome() {
+    const recentList = document.getElementById('recent-list');
+    UI.showLoading(recentList);
     try {
       transactions = await API.getTransactions(currentMonth, 'all');
       UI.renderBalanceCard(transactions);
-      const recentList = document.getElementById('recent-list');
       UI.renderTransactionList(recentList, transactions, categoryMap, { limit: 5 });
     } catch (err) {
       UI.showToast('Ошибка: ' + err.message);
