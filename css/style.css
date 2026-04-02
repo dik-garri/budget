@@ -1,0 +1,776 @@
+/* ============================================================
+   CSS Custom Properties
+   ============================================================ */
+:root {
+  --color-income: #22c55e;
+  --color-expense: #ef4444;
+  --color-bg: #f8f9fa;
+  --color-card: #fff;
+  --color-text: #1a1a1a;
+  --color-text-secondary: #6b7280;
+  --color-border: #e5e7eb;
+}
+
+/* ============================================================
+   Base Reset
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================================
+   Body
+   ============================================================ */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  /* Reserve space for fixed tab bar + safe-area */
+  padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================
+   App Shell
+   ============================================================ */
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ============================================================
+   Header
+   ============================================================ */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background-color: var(--color-card);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.header__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.header__user-select {
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  outline: none;
+  cursor: pointer;
+  min-height: 44px;
+  appearance: auto;
+}
+
+.header__user-select:focus {
+  border-color: #3b82f6;
+}
+
+/* ============================================================
+   Tab Content
+   ============================================================ */
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+  padding: 16px;
+}
+
+/* ============================================================
+   Tab Bar
+   ============================================================ */
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  /* Constrain to max-width of #app on wider screens */
+  max-width: 480px;
+  margin: 0 auto;
+  z-index: 10;
+  display: flex;
+  flex-direction: row;
+  height: 56px;
+  background-color: var(--color-card);
+  border-top: 1px solid var(--color-border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.tab-bar__btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  min-height: 44px;
+  padding: 0;
+  font-family: inherit;
+  transition: color 150ms;
+}
+
+.tab-bar__btn--active {
+  color: #3b82f6;
+}
+
+.tab-bar__icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.tab-bar__label {
+  font-size: 11px;
+  line-height: 1;
+}
+
+/* ============================================================
+   Balance Card
+   ============================================================ */
+.balance-card {
+  background-color: var(--color-card);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.balance-card__row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.balance-card__row--total {
+  border-top: 1px solid var(--color-border);
+  padding-top: 12px;
+  margin-top: 8px;
+  font-weight: 700;
+}
+
+.balance-card__label {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.balance-card__value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.balance-card__value--income {
+  color: var(--color-income);
+}
+
+.balance-card__value--expense {
+  color: var(--color-expense);
+}
+
+/* ============================================================
+   Action Buttons
+   ============================================================ */
+.action-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.action-btn {
+  flex: 1;
+  height: 56px;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 100ms, opacity 100ms;
+  min-height: 44px;
+}
+
+.action-btn:active {
+  transform: scale(0.97);
+}
+
+.action-btn--income {
+  background-color: var(--color-income);
+}
+
+.action-btn--expense {
+  background-color: var(--color-expense);
+}
+
+/* ============================================================
+   Section Title
+   ============================================================ */
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--color-text);
+}
+
+/* ============================================================
+   Transaction List
+   ============================================================ */
+.transaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ============================================================
+   Transaction Date Header
+   ============================================================ */
+.transaction-date-header {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  padding: 12px 0 4px;
+  position: sticky;
+  top: 52px; /* sits below the header */
+  background-color: var(--color-bg);
+  z-index: 5;
+}
+
+/* ============================================================
+   Transaction Item
+   ============================================================ */
+.transaction-item {
+  background-color: var(--color-card);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.transaction-item__main {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 12px 16px;
+  gap: 12px;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.transaction-item__icon {
+  font-size: 24px;
+  width: 40px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.transaction-item__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.transaction-item__category {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.transaction-item__meta {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.transaction-item__amount {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  flex-shrink: 0;
+}
+
+.transaction-item__amount--income {
+  color: var(--color-income);
+}
+
+.transaction-item__amount--expense {
+  color: var(--color-expense);
+}
+
+/* ============================================================
+   Transaction Item — Expandable Actions
+   ============================================================ */
+.transaction-item__actions {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 200ms ease-out;
+}
+
+.transaction-item.expanded .transaction-item__actions {
+  max-height: 48px;
+}
+
+/* ============================================================
+   Delete Button
+   ============================================================ */
+.btn-delete {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background-color: #fef2f2;
+  color: var(--color-expense);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  min-height: 44px;
+  transition: background-color 150ms;
+}
+
+.btn-delete:active {
+  background-color: #fee2e2;
+}
+
+/* ============================================================
+   Bottom Sheet
+   ============================================================ */
+.bottom-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 300ms, opacity 300ms ease;
+}
+
+.bottom-sheet.active {
+  visibility: visible;
+  opacity: 1;
+  transition-delay: 0s;
+}
+
+.bottom-sheet__overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.bottom-sheet__content {
+  position: relative;
+  background-color: var(--color-card);
+  border-radius: 20px 20px 0 0;
+  padding: 16px 16px 32px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-overflow-scrolling: touch;
+}
+
+.bottom-sheet.active .bottom-sheet__content {
+  transform: translateY(0);
+}
+
+.bottom-sheet__handle {
+  width: 40px;
+  height: 4px;
+  background-color: #d1d5db;
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+
+.bottom-sheet__title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  text-align: center;
+  color: var(--color-text);
+}
+
+/* ============================================================
+   Category Grid
+   ============================================================ */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.category-grid__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 4px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background-color: #f3f4f6;
+  cursor: pointer;
+  min-height: 64px;
+  transition: border-color 150ms;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.category-grid__item.selected {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.category-grid__icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.category-grid__label {
+  font-size: 11px;
+  margin-top: 4px;
+  text-align: center;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+
+/* ============================================================
+   Form Groups & Inputs
+   ============================================================ */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.input-amount {
+  width: 100%;
+  font-family: inherit;
+  font-size: 32px;
+  font-weight: 700;
+  text-align: center;
+  border: none;
+  border-bottom: 2px solid var(--color-border);
+  padding: 12px;
+  outline: none;
+  background: transparent;
+  color: var(--color-text);
+  transition: border-color 200ms;
+  /* Remove number input spinners */
+  -moz-appearance: textfield;
+}
+
+.input-amount::-webkit-outer-spin-button,
+.input-amount::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input-amount:focus {
+  border-color: #3b82f6;
+}
+
+.input-comment {
+  width: 100%;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  outline: none;
+  color: var(--color-text);
+  background-color: var(--color-card);
+  transition: border-color 200ms;
+  min-height: 44px;
+}
+
+.input-comment:focus {
+  border-color: #3b82f6;
+}
+
+.input-date {
+  width: 100%;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  outline: none;
+  color: var(--color-text);
+  background-color: var(--color-card);
+  min-height: 44px;
+}
+
+.input-date:focus {
+  border-color: #3b82f6;
+}
+
+/* ============================================================
+   Submit Button
+   ============================================================ */
+.btn-submit {
+  width: 100%;
+  height: 52px;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  background-color: #3b82f6;
+  cursor: pointer;
+  transition: opacity 150ms;
+  min-height: 44px;
+}
+
+.btn-submit:active {
+  opacity: 0.9;
+}
+
+.btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   Month Selector
+   ============================================================ */
+.month-selector {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.month-selector__btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-card);
+  font-family: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  transition: background-color 150ms;
+}
+
+.month-selector__btn:active {
+  background-color: var(--color-bg);
+}
+
+.month-selector__label {
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: capitalize;
+  min-width: 160px;
+  text-align: center;
+  color: var(--color-text);
+}
+
+/* ============================================================
+   Filter Chips
+   ============================================================ */
+.filter-chips {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Hide scrollbar but keep scrollable */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.filter-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-card);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  color: var(--color-text);
+  transition: background-color 150ms, color 150ms, border-color 150ms;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.chip--active {
+  background-color: #3b82f6;
+  color: #fff;
+  border-color: #3b82f6;
+}
+
+/* ============================================================
+   History User Select
+   ============================================================ */
+.history-user-select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  font-family: inherit;
+  font-size: 14px;
+  background-color: var(--color-card);
+  color: var(--color-text);
+  outline: none;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.history-user-select:focus {
+  border-color: #3b82f6;
+}
+
+/* ============================================================
+   Chart Cards
+   ============================================================ */
+.chart-card {
+  background-color: var(--color-card);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.chart-card__title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--color-text);
+}
+
+/* ============================================================
+   Summary Cards
+   ============================================================ */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.summary-card {
+  background-color: var(--color-card);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.summary-card__label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.summary-card__value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* ============================================================
+   Toast
+   ============================================================ */
+.toast {
+  position: fixed;
+  bottom: 72px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  background-color: #1a1a1a;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 200;
+  opacity: 0;
+  transition: transform 200ms ease, opacity 200ms ease;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.toast.active {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ============================================================
+   Loading Spinner
+   ============================================================ */
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin: 40px auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================
+   Empty State
+   ============================================================ */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+/* ============================================================
+   Analytics Section
+   ============================================================ */
+.analytics-charts {
+  /* No special styles needed; chart cards handle their own spacing */
+}
