@@ -296,6 +296,11 @@ git commit -m "feat: add Google Apps Script API for budget app"
         <button class="chip" data-filter="income">Доходы</button>
         <button class="chip" data-filter="expense">Расходы</button>
       </div>
+      <div class="filter-chips">
+        <select id="history-user-filter" class="history-user-select">
+          <option value="all">Все пользователи</option>
+        </select>
+      </div>
       <div id="history-list" class="transaction-list"></div>
     </main>
 
@@ -327,8 +332,8 @@ git commit -m "feat: add Google Apps Script API for budget app"
           <input id="input-amount" type="number" inputmode="decimal" class="input-amount" placeholder="Сумма">
         </div>
 
-        <div class="form-group form-group--collapsed">
-          <input id="input-comment" type="text" class="input-comment" placeholder="Комментарий" maxlength="100">
+        <div class="form-group">
+          <input id="input-comment" type="text" class="input-comment" placeholder="Комментарий (необязательно)" maxlength="100">
         </div>
 
         <div class="form-group">
@@ -863,6 +868,16 @@ const App = (() => {
 
   async function loadHistory() {
     document.getElementById('month-label').textContent = UI.getMonthLabel(currentMonth);
+    // Populate user filter
+    const userSelect = document.getElementById('history-user-filter');
+    if (userSelect.options.length <= 1) {
+      users.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u;
+        opt.textContent = u;
+        userSelect.appendChild(opt);
+      });
+    }
     const list = document.getElementById('history-list');
     UI.showLoading(list);
 
@@ -878,12 +893,16 @@ const App = (() => {
 
   function applyHistoryFilter() {
     const active = document.querySelector('.chip.chip--active');
-    const filter = active ? active.dataset.filter : 'all';
+    const typeFilter = active ? active.dataset.filter : 'all';
+    const userFilter = document.getElementById('history-user-filter').value;
     const list = document.getElementById('history-list');
 
     let filtered = transactions;
-    if (filter !== 'all') {
-      filtered = transactions.filter(tx => tx.type === filter);
+    if (typeFilter !== 'all') {
+      filtered = filtered.filter(tx => tx.type === typeFilter);
+    }
+    if (userFilter !== 'all') {
+      filtered = filtered.filter(tx => tx.user === userFilter);
     }
     UI.renderTransactionList(list, filtered, categoryMap, { expandable: true });
     bindDeleteButtons(list);
@@ -1033,6 +1052,9 @@ const App = (() => {
       });
     });
 
+    // History user filter
+    document.getElementById('history-user-filter').addEventListener('change', applyHistoryFilter);
+
     // Refresh on visibility
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) switchTab(currentTab);
@@ -1073,7 +1095,7 @@ Key additions beyond the foundation:
 - `.empty-state` — centered gray text
 - `.bottom-sheet__content` — max-height 85vh, overflow-y auto
 - `.bottom-sheet__handle` — small gray pill at top for visual affordance
-- `.form-group--collapsed` — initially hidden, expand on focus/click
+- `.history-user-select` — styled select for user filter in history tab
 - Transitions: bottom-sheet slide-up 300ms, toast slide-up 200ms, chip color 150ms
 - Media query for tablets: center content with max-width
 
