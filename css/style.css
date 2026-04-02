@@ -103,11 +103,10 @@ body {
 .tab-bar {
   position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
-  /* Constrain to max-width of #app on wider screens */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
   max-width: 480px;
-  margin: 0 auto;
   z-index: 10;
   display: flex;
   flex-direction: row;
@@ -730,7 +729,9 @@ body {
   z-index: 200;
   opacity: 0;
   transition: transform 200ms ease, opacity 200ms ease;
-  white-space: nowrap;
+  white-space: normal;
+  max-width: calc(100vw - 32px);
+  text-align: center;
   pointer-events: none;
 }
 

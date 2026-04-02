@@ -160,15 +160,21 @@ function addTransaction(body) {
 }
 
 function deleteTransaction(id) {
-  const sheet = getSheet('Transactions');
-  const data = sheet.getDataRange().getValues();
+  const lock = LockService.getScriptLock();
+  lock.waitLock(5000);
+  try {
+    const sheet = getSheet('Transactions');
+    const data = sheet.getDataRange().getValues();
 
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === id) {
-      sheet.deleteRow(i + 1);
-      return { status: 'ok' };
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0] === id) {
+        sheet.deleteRow(i + 1);
+        return { status: 'ok' };
+      }
     }
-  }
 
-  return { status: 'error', message: 'Transaction not found' };
+    return { status: 'error', message: 'Transaction not found' };
+  } finally {
+    lock.releaseLock();
+  }
 }

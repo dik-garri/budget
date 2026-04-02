@@ -50,7 +50,7 @@ const App = (() => {
 
   async function loadHome() {
     try {
-      transactions = await API.getTransactions(currentMonth, 'all');
+      transactions = await API.getTransactions(currentMonth, currentUser);
       UI.renderBalanceCard(transactions);
       const recentList = document.getElementById('recent-list');
       UI.renderTransactionList(recentList, transactions, categoryMap, { limit: 5 });
@@ -76,8 +76,6 @@ const App = (() => {
 
     try {
       transactions = await API.getTransactions(currentMonth, 'all');
-      UI.renderTransactionList(list, transactions, categoryMap, { expandable: true });
-      bindDeleteButtons(list);
       applyHistoryFilter();
     } catch (err) {
       UI.showToast('Ошибка: ' + err.message);

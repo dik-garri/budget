@@ -40,7 +40,7 @@ const API = (() => {
 
   return {
     setUrl,
-    getUrl: () => BASE_URL,
+    getUrl: () => localStorage.getItem('budget_api_url') || '',
     generateId,
     getTransactions: (month, user) => get({ action: 'transactions', month: month || 'all', user: user || 'all' }),
     getCategories: () => get({ action: 'categories' }),
