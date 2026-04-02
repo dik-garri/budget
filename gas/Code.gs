@@ -4,6 +4,16 @@ function getSheet(name) {
   return SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(name);
 }
 
+function formatDate(value) {
+  if (value instanceof Date) {
+    var y = value.getFullYear();
+    var m = String(value.getMonth() + 1).padStart(2, '0');
+    var d = String(value.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + d;
+  }
+  return String(value);
+}
+
 function doGet(e) {
   const action = e.parameter.action;
   let result;
@@ -41,7 +51,7 @@ function getTransactions(month, user) {
   let filtered = rows;
 
   if (month && month !== 'all') {
-    filtered = filtered.filter(row => String(row[1]).startsWith(month));
+    filtered = filtered.filter(row => formatDate(row[1]).startsWith(month));
   }
 
   if (user && user !== 'all') {
@@ -50,7 +60,7 @@ function getTransactions(month, user) {
 
   const transactions = filtered.map(row => ({
     id: row[0],
-    date: row[1],
+    date: formatDate(row[1]),
     amount: row[2],
     type: row[3],
     category: row[4],
@@ -98,7 +108,7 @@ function getSummary(months, user) {
   }
 
   rows.forEach(row => {
-    const date = String(row[1]);
+    const date = formatDate(row[1]);
     const monthKey = date.substring(0, 7);
     if (!summaryByMonth[monthKey]) return;
     if (user && user !== 'all' && row[5] !== user) return;
