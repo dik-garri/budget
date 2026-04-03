@@ -94,7 +94,13 @@
         <div id="category-grid" class="category-grid"></div>
 
         <div class="form-group">
-          <input id="input-amount" type="text" class="input-amount" placeholder="Сумма или выражение (500+300)">
+          <input id="input-amount" type="text" inputmode="decimal" class="input-amount" placeholder="Сумма">
+          <div class="calc-buttons">
+            <button type="button" class="calc-btn" data-op="+">+</button>
+            <button type="button" class="calc-btn" data-op="-">&minus;</button>
+            <button type="button" class="calc-btn" data-op="*">&times;</button>
+            <button type="button" class="calc-btn" data-op="/">&divide;</button>
+          </div>
           <div id="calc-result" class="calc-result"></div>
         </div>
 

@@ -329,6 +329,16 @@ const App = (() => {
     document.querySelector('.bottom-sheet__overlay').addEventListener('click', closeSheet);
     document.getElementById('btn-submit').addEventListener('click', submitTransaction);
 
+    // Calculator buttons
+    document.querySelectorAll('.calc-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = document.getElementById('input-amount');
+        input.value += btn.dataset.op;
+        input.focus();
+        input.dispatchEvent(new Event('input'));
+      });
+    });
+
     // Calculator preview
     document.getElementById('input-amount').addEventListener('input', (e) => {
       const val = e.target.value.trim();
