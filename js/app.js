@@ -106,12 +106,55 @@ const App = (() => {
     bindDeleteButtons(list);
   }
 
+  let analyticsUser = 'all';
+
   async function loadAnalytics() {
+    // Populate user filter
+    const userSelect = document.getElementById('analytics-user-filter');
+    if (userSelect.options.length <= 1) {
+      users.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u;
+        opt.textContent = u;
+        userSelect.appendChild(opt);
+      });
+    }
+    userSelect.value = analyticsUser;
+
+    // Hide category detail
+    document.getElementById('category-detail').style.display = 'none';
+
     try {
-      const summary = await API.getSummary(6, currentUser);
-      Charts.renderDonut('chart-donut', summary);
+      const summary = await API.getSummary(6, analyticsUser);
+      Charts.renderDonut('chart-donut', summary, onCategoryClick);
       Charts.renderBar('chart-bar', summary);
       Charts.renderSummaryCards(document.getElementById('analytics-summary'), summary);
+    } catch (err) {
+      UI.showToast('Ошибка: ' + err.message);
+    }
+  }
+
+  async function onCategoryClick(categoryName) {
+    const detail = document.getElementById('category-detail');
+    const title = document.getElementById('category-detail-title');
+    const list = document.getElementById('category-detail-list');
+
+    title.textContent = categoryName;
+    detail.style.display = '';
+    UI.showLoading(list);
+
+    try {
+      // Fetch all transactions for last 6 months
+      const allTx = await API.getTransactions('all', analyticsUser);
+      const now = new Date();
+      const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+      const minDate = sixMonthsAgo.toISOString().slice(0, 10);
+
+      const filtered = allTx.filter(tx => tx.category === categoryName && tx.date >= minDate);
+      UI.renderTransactionList(list, filtered, categoryMap, {});
+
+      // Scroll to detail
+      detail.scrollIntoView({ behavior: 'smooth' });
     } catch (err) {
       UI.showToast('Ошибка: ' + err.message);
     }
@@ -378,6 +421,12 @@ const App = (() => {
 
     // History user filter
     document.getElementById('history-user-filter').addEventListener('change', applyHistoryFilter);
+
+    // Analytics user filter
+    document.getElementById('analytics-user-filter').addEventListener('change', (e) => {
+      analyticsUser = e.target.value;
+      loadAnalytics();
+    });
 
     // Refresh on visibility
     document.addEventListener('visibilitychange', () => {

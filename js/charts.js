@@ -8,7 +8,7 @@ const Charts = (() => {
     '#3b82f6', '#8b5cf6', '#ec4899', '#6b7280', '#78716c'
   ];
 
-  function renderDonut(canvasId, summaryData) {
+  function renderDonut(canvasId, summaryData, onCategoryClick) {
     const canvas = document.getElementById(canvasId);
     if (donutChart) donutChart.destroy();
 
@@ -37,6 +37,12 @@ const Charts = (() => {
       },
       options: {
         responsive: true,
+        onClick: (evt, elements) => {
+          if (elements.length > 0 && onCategoryClick) {
+            const idx = elements[0].index;
+            onCategoryClick(entries[idx][0]);
+          }
+        },
         plugins: {
           legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } }
         }

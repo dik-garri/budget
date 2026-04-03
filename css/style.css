@@ -720,8 +720,14 @@ body {
 .chart-card__title {
   font-size: 16px;
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
   color: var(--color-text);
+}
+
+.chart-card__hint {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
 }
 
 /* ============================================================

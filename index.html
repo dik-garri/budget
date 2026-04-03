@@ -71,9 +71,15 @@
 
     <!-- Tab: Analytics -->
     <main id="tab-analytics" class="tab-content">
+      <div class="filter-chips">
+        <select id="analytics-user-filter" class="history-user-select">
+          <option value="all">Все пользователи</option>
+        </select>
+      </div>
       <div class="analytics-charts">
         <div class="chart-card">
           <h3 class="chart-card__title">Расходы по категориям</h3>
+          <p class="chart-card__hint">Нажмите на категорию для деталей</p>
           <canvas id="chart-donut"></canvas>
         </div>
         <div class="chart-card">
@@ -82,6 +88,10 @@
         </div>
       </div>
       <div id="analytics-summary" class="summary-cards"></div>
+      <div id="category-detail" class="chart-card" style="display:none">
+        <h3 id="category-detail-title" class="chart-card__title"></h3>
+        <div id="category-detail-list" class="transaction-list"></div>
+      </div>
     </main>
 
     <!-- Bottom Sheet Modal -->
