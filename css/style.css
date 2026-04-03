@@ -509,6 +509,14 @@ body {
   border-color: #3b82f6;
 }
 
+.calc-result {
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  min-height: 20px;
+  margin-top: 4px;
+}
+
 .input-comment {
   width: 100%;
   font-family: inherit;

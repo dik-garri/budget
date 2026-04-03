@@ -213,8 +213,20 @@ const App = (() => {
     }
   }
 
+  function evalAmount(expr) {
+    const cleaned = expr.replace(/[^0-9+\-*/().,]/g, '').replace(/,/g, '.');
+    if (!cleaned) return NaN;
+    try {
+      const result = Function('"use strict"; return (' + cleaned + ')')();
+      return typeof result === 'number' && isFinite(result) ? result : NaN;
+    } catch (e) {
+      return NaN;
+    }
+  }
+
   async function submitTransaction() {
-    const amount = parseFloat(document.getElementById('input-amount').value);
+    const raw = document.getElementById('input-amount').value.trim();
+    const amount = evalAmount(raw);
     if (!amount || amount <= 0) {
       UI.showToast('Введите сумму');
       return;
@@ -316,6 +328,18 @@ const App = (() => {
     // Bottom sheet
     document.querySelector('.bottom-sheet__overlay').addEventListener('click', closeSheet);
     document.getElementById('btn-submit').addEventListener('click', submitTransaction);
+
+    // Calculator preview
+    document.getElementById('input-amount').addEventListener('input', (e) => {
+      const val = e.target.value.trim();
+      const resultEl = document.getElementById('calc-result');
+      if (/[+\-*/]/.test(val)) {
+        const result = evalAmount(val);
+        resultEl.textContent = isNaN(result) ? '' : '= ' + UI.formatMoney(Math.round(result * 100) / 100);
+      } else {
+        resultEl.textContent = '';
+      }
+    });
 
     // Category dialog
     document.querySelector('.dialog__overlay').addEventListener('click', closeCategoryDialog);
