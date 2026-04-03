@@ -14,6 +14,10 @@ const API = (() => {
     const res = await fetch(url.toString(), { redirect: 'follow' });
     const json = await res.json();
     if (json.status !== 'ok') throw new Error(json.message || 'API error');
+    // Assign rowNum based on array order (GAS returns in sheet order)
+    if (Array.isArray(json.data)) {
+      json.data.forEach((item, i) => { if (typeof item === 'object') item.rowNum = i; });
+    }
     return json.data;
   }
 
