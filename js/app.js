@@ -81,13 +81,21 @@ const App = (() => {
 
   async function loadAnalytics() {
     document.getElementById('category-detail').style.display = 'none';
+    document.getElementById('analytics-summary').innerHTML = '';
+    document.getElementById('chart-donut').style.display = 'none';
+    document.getElementById('chart-bar').style.display = 'none';
+    document.querySelector('.analytics-charts').insertAdjacentHTML('afterbegin', '<div id="analytics-spinner" class="loading-spinner"></div>');
 
     try {
       const summary = await API.getSummary(6, 'all');
+      const spinner = document.getElementById('analytics-spinner');
+      if (spinner) spinner.remove();
       Charts.renderDonut('chart-donut', summary, onCategoryClick);
       Charts.renderBar('chart-bar', summary);
       Charts.renderSummaryCards(document.getElementById('analytics-summary'), summary);
     } catch (err) {
+      const spinner = document.getElementById('analytics-spinner');
+      if (spinner) spinner.remove();
       UI.showToast('Ошибка: ' + err.message);
     }
   }
