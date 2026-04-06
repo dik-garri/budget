@@ -48,7 +48,6 @@ const API = (() => {
     generateId,
     getTransactions: (month, user) => get({ action: 'transactions', month: month || 'all', user: user || 'all' }),
     getCategories: () => get({ action: 'categories' }),
-    getUsers: () => get({ action: 'users' }),
     getSummary: (months, user) => get({ action: 'summary', months: months || 6, user: user || 'all' }),
     addCategory: (cat) => post({ action: 'addCategory', ...cat }),
     addTransaction: (tx) => post({ action: 'addTransaction', ...tx }),

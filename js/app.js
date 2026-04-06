@@ -1,11 +1,9 @@
 // js/app.js
 const App = (() => {
   let currentTab = 'home';
-  let currentUser = localStorage.getItem('budget_user') || '';
   let currentMonth = new Date().toISOString().slice(0, 7);
   let transactions = [];
   let categories = [];
-  let users = [];
   let categoryMap = {};
   let sheetType = '';
   let selectedCategory = '';
@@ -28,20 +26,9 @@ const App = (() => {
   // --- Data loading ---
   async function loadInitialData() {
     try {
-      [categories, users] = await Promise.all([
-        API.getCategories(),
-        API.getUsers()
-      ]);
+      categories = await API.getCategories();
       categoryMap = {};
       categories.forEach(c => { categoryMap[c.name] = c; });
-
-      if (users.length > 0) {
-        if (!currentUser || !users.includes(currentUser)) {
-          currentUser = users[0];
-          localStorage.setItem('budget_user', currentUser);
-        }
-        UI.renderUserSelect(document.getElementById('user-select'), users, currentUser);
-      }
 
       await loadHome();
     } catch (err) {
@@ -67,16 +54,6 @@ const App = (() => {
 
   async function loadHistory() {
     document.getElementById('month-label').textContent = UI.getMonthLabel(currentMonth);
-    // Populate user filter
-    const userSelect = document.getElementById('history-user-filter');
-    if (userSelect.options.length <= 1) {
-      users.forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u;
-        opt.textContent = u;
-        userSelect.appendChild(opt);
-      });
-    }
     const list = document.getElementById('history-list');
     UI.showLoading(list);
 
@@ -91,41 +68,22 @@ const App = (() => {
   function applyHistoryFilter() {
     const active = document.querySelector('.chip.chip--active');
     const typeFilter = active ? active.dataset.filter : 'all';
-    const userFilter = document.getElementById('history-user-filter').value;
     const list = document.getElementById('history-list');
 
     let filtered = transactions;
     if (typeFilter !== 'all') {
       filtered = filtered.filter(tx => tx.type === typeFilter);
     }
-    if (userFilter !== 'all') {
-      filtered = filtered.filter(tx => tx.user === userFilter);
-    }
     UI.renderTransactionList(list, filtered, categoryMap, { expandable: true });
     bindEditButtons(list);
     bindDeleteButtons(list);
   }
 
-  let analyticsUser = 'all';
-
   async function loadAnalytics() {
-    // Populate user filter
-    const userSelect = document.getElementById('analytics-user-filter');
-    if (userSelect.options.length <= 1) {
-      users.forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u;
-        opt.textContent = u;
-        userSelect.appendChild(opt);
-      });
-    }
-    userSelect.value = analyticsUser;
-
-    // Hide category detail
     document.getElementById('category-detail').style.display = 'none';
 
     try {
-      const summary = await API.getSummary(6, analyticsUser);
+      const summary = await API.getSummary(6, 'all');
       Charts.renderDonut('chart-donut', summary, onCategoryClick);
       Charts.renderBar('chart-bar', summary);
       Charts.renderSummaryCards(document.getElementById('analytics-summary'), summary);
@@ -144,8 +102,7 @@ const App = (() => {
     UI.showLoading(list);
 
     try {
-      // Fetch all transactions for last 6 months
-      const allTx = await API.getTransactions('all', analyticsUser);
+      const allTx = await API.getTransactions('all', 'all');
       const now = new Date();
       const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
       const minDate = sixMonthsAgo.toISOString().slice(0, 10);
@@ -153,7 +110,6 @@ const App = (() => {
       const filtered = allTx.filter(tx => tx.category === categoryName && tx.date >= minDate);
       UI.renderTransactionList(list, filtered, categoryMap, {});
 
-      // Scroll to detail
       detail.scrollIntoView({ behavior: 'smooth' });
     } catch (err) {
       UI.showToast('Ошибка: ' + err.message);
@@ -178,7 +134,6 @@ const App = (() => {
       selectedCategory = name;
     }, () => openCategoryDialog(type));
 
-    // Pre-select category if editing
     if (editTx) {
       const gridItems = document.querySelectorAll('.category-grid__item');
       gridItems.forEach(btn => {
@@ -218,7 +173,7 @@ const App = (() => {
 
   async function saveCategory() {
     const dialog = document.getElementById('category-dialog');
-    const icon = document.getElementById('cat-icon').value.trim() || '📁';
+    const icon = document.getElementById('cat-icon').value.trim() || '\u{1F4C1}';
     const name = document.getElementById('cat-name').value.trim();
     if (!name) {
       UI.showToast('Введите название');
@@ -235,12 +190,10 @@ const App = (() => {
       categories.push({ name, type, icon });
       categoryMap[name] = { name, type, icon };
       closeCategoryDialog();
-      // Re-render category grid in the open bottom sheet
       const filtered = categories.filter(c => c.type === type);
       UI.renderCategoryGrid(document.getElementById('category-grid'), filtered, (n) => {
         selectedCategory = n;
       }, () => openCategoryDialog(type));
-      // Auto-select the new category
       selectedCategory = name;
       const gridItems = document.querySelectorAll('.category-grid__item');
       gridItems.forEach(b => {
@@ -285,7 +238,7 @@ const App = (() => {
       amount: amount,
       type: sheetType,
       category: selectedCategory,
-      user: currentUser,
+      user: '',
       comment: document.getElementById('input-comment').value.trim()
     };
 
@@ -399,13 +352,6 @@ const App = (() => {
     document.getElementById('cat-cancel').addEventListener('click', closeCategoryDialog);
     document.getElementById('cat-save').addEventListener('click', saveCategory);
 
-    // User select
-    document.getElementById('user-select').addEventListener('change', (e) => {
-      currentUser = e.target.value;
-      localStorage.setItem('budget_user', currentUser);
-      switchTab(currentTab);
-    });
-
     // Month navigation
     document.getElementById('month-prev').addEventListener('click', () => changeMonth(-1));
     document.getElementById('month-next').addEventListener('click', () => changeMonth(1));
@@ -417,15 +363,6 @@ const App = (() => {
         chip.classList.add('chip--active');
         applyHistoryFilter();
       });
-    });
-
-    // History user filter
-    document.getElementById('history-user-filter').addEventListener('change', applyHistoryFilter);
-
-    // Analytics user filter
-    document.getElementById('analytics-user-filter').addEventListener('change', (e) => {
-      analyticsUser = e.target.value;
-      loadAnalytics();
     });
 
     // Refresh on visibility

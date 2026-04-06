@@ -62,7 +62,7 @@ const UI = (() => {
           <span class="transaction-item__icon">${cat.icon}</span>
           <div class="transaction-item__info">
             <span class="transaction-item__category">${cat.name}</span>
-            <span class="transaction-item__meta">${tx.user}${tx.comment ? ' \u00b7 ' + tx.comment : ''}</span>
+            <span class="transaction-item__meta">${tx.comment || ''}</span>
           </div>
           <span class="transaction-item__amount ${colorClass}">${sign}${formatMoney(tx.amount)}</span>
         </div>
@@ -109,17 +109,6 @@ const UI = (() => {
     }
   }
 
-  function renderUserSelect(selectEl, users, current) {
-    selectEl.innerHTML = '';
-    users.forEach(u => {
-      const opt = document.createElement('option');
-      opt.value = u;
-      opt.textContent = u;
-      if (u === current) opt.selected = true;
-      selectEl.appendChild(opt);
-    });
-  }
-
   function showToast(message, duration = 3000) {
     const toast = document.getElementById('toast');
     toast.textContent = message;
@@ -138,7 +127,6 @@ const UI = (() => {
     renderBalanceCard,
     renderTransactionList,
     renderCategoryGrid,
-    renderUserSelect,
     showToast,
     showLoading
   };

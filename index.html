@@ -18,7 +18,6 @@
     <!-- Header -->
     <header class="header">
       <h1 class="header__title">Budget</h1>
-      <select id="user-select" class="header__user-select"></select>
     </header>
 
     <!-- Tab: Home -->
@@ -61,21 +60,11 @@
         <button class="chip" data-filter="income">Доходы</button>
         <button class="chip" data-filter="expense">Расходы</button>
       </div>
-      <div class="filter-chips">
-        <select id="history-user-filter" class="history-user-select">
-          <option value="all">Все пользователи</option>
-        </select>
-      </div>
       <div id="history-list" class="transaction-list"></div>
     </main>
 
     <!-- Tab: Analytics -->
     <main id="tab-analytics" class="tab-content">
-      <div class="filter-chips">
-        <select id="analytics-user-filter" class="history-user-select">
-          <option value="all">Все пользователи</option>
-        </select>
-      </div>
       <div class="analytics-charts">
         <div class="chart-card">
           <h3 class="chart-card__title">Расходы по категориям</h3>
