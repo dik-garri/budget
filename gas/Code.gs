@@ -213,6 +213,9 @@ function doPost(e) {
       case 'deleteTransaction':
         result = deleteTransaction(body.id);
         break;
+      case 'addDebt':
+        result = addDebt(body);
+        break;
       default:
         result = { status: 'error', message: 'Unknown action: ' + body.action };
     }
@@ -222,6 +225,65 @@ function doPost(e) {
 
   return ContentService.createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function ensureDebtsCategory() {
+  const sheet = getSheet('Categories');
+  const data = sheet.getDataRange().getValues();
+  const rows = data.slice(1);
+
+  const hasExpense = rows.some(r => r[0] === 'Долги' && r[1] === 'expense');
+  const hasIncome = rows.some(r => r[0] === 'Долги' && r[1] === 'income');
+
+  if (!hasExpense) sheet.appendRow(['Долги', 'expense', '🤝']);
+  if (!hasIncome) sheet.appendRow(['Долги', 'income', '🤝']);
+}
+
+function addDebt(body) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(5000);
+  try {
+    const amount = Number(body.amount);
+    if (!(amount > 0)) {
+      return { status: 'error', message: 'Amount must be > 0' };
+    }
+    if (body.type !== 'lent' && body.type !== 'borrowed') {
+      return { status: 'error', message: 'Invalid type' };
+    }
+
+    ensureDebtsCategory();
+
+    const counterparty = String(body.counterparty || '').trim().substring(0, 50);
+    if (!counterparty) {
+      return { status: 'error', message: 'Counterparty required' };
+    }
+    const comment = String(body.comment || '').substring(0, 100);
+
+    getSheet('Debts').appendRow([
+      body.id,
+      counterparty,
+      body.type,
+      amount,
+      body.date,
+      comment
+    ]);
+
+    const txType = body.type === 'lent' ? 'expense' : 'income';
+    getSheet('Transactions').appendRow([
+      body.id,
+      body.date,
+      amount,
+      txType,
+      'Долги',
+      '',
+      counterparty,
+      body.id
+    ]);
+
+    return { status: 'ok' };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function addCategory(body) {
