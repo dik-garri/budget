@@ -18,10 +18,10 @@ const App = (() => {
       el.classList.toggle('tab-bar__btn--active', el.dataset.tab === tab);
     });
 
-    if (tab === 'home') loadHome();
-    if (tab === 'history') loadHistory();
-    if (tab === 'analytics') loadAnalytics();
-    if (tab === 'debts') Debts.load();
+    if (tab === 'home') return loadHome();
+    if (tab === 'history') return loadHistory();
+    if (tab === 'analytics') return loadAnalytics();
+    if (tab === 'debts') return Debts.load();
   }
 
   // --- Data loading ---
@@ -337,7 +337,7 @@ const App = (() => {
     document.getElementById('btn-expense').addEventListener('click', () => openSheet('expense'));
 
     // Bottom sheet
-    document.querySelector('.bottom-sheet__overlay').addEventListener('click', closeSheet);
+    document.querySelector('#bottom-sheet .bottom-sheet__overlay').addEventListener('click', closeSheet);
     document.getElementById('btn-submit').addEventListener('click', submitTransaction);
 
     // Calculator buttons

@@ -208,21 +208,22 @@ const Debts = (() => {
     btn.disabled = true;
     btn.textContent = '...';
 
+    const wasEditing = !!editingDebtId;
     try {
       const payload = { id: editingDebtId || API.generateId(), counterparty, type, amount, date, comment };
-      if (editingDebtId) {
+      if (wasEditing) {
         await API.editDebt(payload);
       } else {
         await API.addDebt(payload);
       }
       closeDebtSheet();
-      UI.showToast(editingDebtId ? 'Сохранено' : 'Добавлено');
+      UI.showToast(wasEditing ? 'Сохранено' : 'Добавлено');
       await load();
     } catch (err) {
       UI.showToast('Ошибка: ' + err.message);
     } finally {
       btn.disabled = false;
-      btn.textContent = editingDebtId ? 'Сохранить' : 'Добавить';
+      btn.textContent = wasEditing ? 'Сохранить' : 'Добавить';
     }
   }
 
@@ -300,8 +301,7 @@ const Debts = (() => {
   }
 
   async function openDebtById(debtId) {
-    App.switchTab('debts');
-    await load();
+    await App.switchTab('debts');
     const debt = debts.find(d => d.id === debtId);
     if (!debt) { UI.showToast('Долг не найден'); return; }
     const card = document.querySelector(`.debt-card[data-id="${debt.id}"]`);
