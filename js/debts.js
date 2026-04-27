@@ -300,17 +300,15 @@ const Debts = (() => {
   }
 
   async function openDebtById(debtId) {
-    if (debts.length === 0) await load();
+    App.switchTab('debts');
+    await load();
     const debt = debts.find(d => d.id === debtId);
     if (!debt) { UI.showToast('Долг не найден'); return; }
-    App.switchTab('debts');
-    setTimeout(() => {
-      const card = document.querySelector(`.debt-card[data-id="${debt.id}"]`);
-      if (card) {
-        toggleCard(card, debt);
-        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 200);
+    const card = document.querySelector(`.debt-card[data-id="${debt.id}"]`);
+    if (card) {
+      toggleCard(card, debt);
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 
   function init() {
