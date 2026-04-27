@@ -21,6 +21,7 @@ const App = (() => {
     if (tab === 'home') loadHome();
     if (tab === 'history') loadHistory();
     if (tab === 'analytics') loadAnalytics();
+    if (tab === 'debts') Debts.load();
   }
 
   // --- Data loading ---
