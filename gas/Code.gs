@@ -222,6 +222,12 @@ function doPost(e) {
       case 'deleteDebt':
         result = deleteDebt(body);
         break;
+      case 'addDebtPayment':
+        result = addDebtPayment(body);
+        break;
+      case 'deleteDebtPayment':
+        result = deleteDebtPayment(body);
+        break;
       default:
         result = { status: 'error', message: 'Unknown action: ' + body.action };
     }
@@ -231,6 +237,85 @@ function doPost(e) {
 
   return ContentService.createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function addDebtPayment(body) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(5000);
+  try {
+    const amount = Number(body.amount);
+    if (!(amount > 0)) {
+      return { status: 'error', message: 'Amount must be > 0' };
+    }
+
+    const debtsSheet = getSheet('Debts');
+    const debtsData = debtsSheet.getDataRange().getValues();
+    let parentDebt = null;
+    for (let i = 1; i < debtsData.length; i++) {
+      if (debtsData[i][0] === body.debt_id) {
+        parentDebt = { type: debtsData[i][2], counterparty: debtsData[i][1] };
+        break;
+      }
+    }
+    if (!parentDebt) return { status: 'error', message: 'Parent debt not found' };
+
+    const comment = String(body.comment || '').substring(0, 100);
+
+    getSheet('DebtPayments').appendRow([
+      body.id,
+      body.debt_id,
+      amount,
+      body.date,
+      comment
+    ]);
+
+    const txType = parentDebt.type === 'lent' ? 'income' : 'expense';
+    getSheet('Transactions').appendRow([
+      body.id,
+      body.date,
+      amount,
+      txType,
+      'Долги',
+      '',
+      parentDebt.counterparty,
+      body.debt_id
+    ]);
+
+    return { status: 'ok' };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function deleteDebtPayment(body) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(5000);
+  try {
+    const paymentsSheet = getSheet('DebtPayments');
+    const paymentsData = paymentsSheet.getDataRange().getValues();
+    let deleted = false;
+    for (let i = 1; i < paymentsData.length; i++) {
+      if (paymentsData[i][0] === body.id) {
+        paymentsSheet.deleteRow(i + 1);
+        deleted = true;
+        break;
+      }
+    }
+
+    const txSheet = getSheet('Transactions');
+    const txData = txSheet.getDataRange().getValues();
+    for (let i = 1; i < txData.length; i++) {
+      if (txData[i][0] === body.id) {
+        txSheet.deleteRow(i + 1);
+        break;
+      }
+    }
+
+    if (!deleted) return { status: 'error', message: 'Payment not found' };
+    return { status: 'ok' };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function deleteDebt(body) {
