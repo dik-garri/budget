@@ -219,6 +219,9 @@ function doPost(e) {
       case 'editDebt':
         result = editDebt(body);
         break;
+      case 'deleteDebt':
+        result = deleteDebt(body);
+        break;
       default:
         result = { status: 'error', message: 'Unknown action: ' + body.action };
     }
@@ -228,6 +231,37 @@ function doPost(e) {
 
   return ContentService.createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function deleteDebt(body) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(5000);
+  try {
+    const txSheet = getSheet('Transactions');
+    const txData = txSheet.getDataRange().getValues();
+    for (let i = txData.length - 1; i >= 1; i--) {
+      if (txData[i][7] === body.id) txSheet.deleteRow(i + 1);
+    }
+
+    const paymentsSheet = getSheet('DebtPayments');
+    const paymentsData = paymentsSheet.getDataRange().getValues();
+    for (let i = paymentsData.length - 1; i >= 1; i--) {
+      if (paymentsData[i][1] === body.id) paymentsSheet.deleteRow(i + 1);
+    }
+
+    const debtsSheet = getSheet('Debts');
+    const debtsData = debtsSheet.getDataRange().getValues();
+    for (let i = 1; i < debtsData.length; i++) {
+      if (debtsData[i][0] === body.id) {
+        debtsSheet.deleteRow(i + 1);
+        return { status: 'ok' };
+      }
+    }
+
+    return { status: 'error', message: 'Debt not found' };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function editDebt(body) {
