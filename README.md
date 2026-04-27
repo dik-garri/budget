@@ -8,9 +8,11 @@ Simple mobile-first budget tracking app. Google Sheets as database. Installable 
 
 Create a new Google Spreadsheet with 3 sheets:
 
-- **Transactions** — headers in row 1: `id`, `date`, `amount`, `type`, `category`, `user`, `comment`
+- **Transactions** — headers in row 1: `id`, `date`, `amount`, `type`, `category`, `user`, `comment`, `debt_id`
 - **Categories** — headers in row 1: `name`, `type`, `icon`. Pre-populate with categories (see below).
 - **Users** — header in row 1: `name`. Add user names.
+- **Debts** — headers in row 1: `id`, `counterparty`, `type`, `amount`, `date`, `comment`
+- **DebtPayments** — headers in row 1: `id`, `debt_id`, `amount`, `date`, `comment`
 
 Default categories to add:
 
