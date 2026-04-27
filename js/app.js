@@ -138,7 +138,7 @@ const App = (() => {
       document.getElementById('sheet-title').textContent = type === 'income' ? 'Новый доход' : 'Новый расход';
     }
 
-    const filtered = categories.filter(c => c.type === type);
+    const filtered = categories.filter(c => c.type === type && c.name !== 'Долги');
     UI.renderCategoryGrid(document.getElementById('category-grid'), filtered, (name) => {
       selectedCategory = name;
     }, () => openCategoryDialog(type));
@@ -199,7 +199,7 @@ const App = (() => {
       categories.push({ name, type, icon });
       categoryMap[name] = { name, type, icon };
       closeCategoryDialog();
-      const filtered = categories.filter(c => c.type === type);
+      const filtered = categories.filter(c => c.type === type && c.name !== 'Долги');
       UI.renderCategoryGrid(document.getElementById('category-grid'), filtered, (n) => {
         selectedCategory = n;
       }, () => openCategoryDialog(type));
@@ -277,6 +277,11 @@ const App = (() => {
     container.querySelectorAll('.btn-edit').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        const debtId = btn.dataset.debtId;
+        if (debtId) {
+          Debts.openDebtById(debtId);
+          return;
+        }
         const id = btn.dataset.id;
         const tx = transactions.find(t => t.id === id);
         if (tx) openSheet(tx.type, tx);
@@ -287,6 +292,7 @@ const App = (() => {
   // --- Delete ---
   function bindDeleteButtons(container) {
     container.querySelectorAll('.btn-delete').forEach(btn => {
+      if (btn.disabled) return;
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         if (!confirm('Удалить операцию?')) return;
@@ -366,9 +372,9 @@ const App = (() => {
     document.getElementById('month-next').addEventListener('click', () => changeMonth(1));
 
     // Filter chips
-    document.querySelectorAll('.chip').forEach(chip => {
+    document.querySelectorAll('#tab-history .chip[data-filter]').forEach(chip => {
       chip.addEventListener('click', () => {
-        document.querySelectorAll('.chip').forEach(c => c.classList.remove('chip--active'));
+        document.querySelectorAll('#tab-history .chip[data-filter]').forEach(c => c.classList.remove('chip--active'));
         chip.classList.add('chip--active');
         applyHistoryFilter();
       });

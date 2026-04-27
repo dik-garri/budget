@@ -49,26 +49,31 @@ const UI = (() => {
         container.appendChild(dateHeader);
       }
 
+      const isDebt = !!tx.debt_id;
       const cat = categoryMap[tx.category] || { icon: '\u{1F4E6}', name: tx.category };
       const item = document.createElement('div');
-      item.className = 'transaction-item';
+      item.className = 'transaction-item' + (isDebt ? ' transaction-item--debt' : '');
       item.dataset.id = tx.id;
+      if (isDebt) item.dataset.debtId = tx.debt_id;
 
       const sign = tx.type === 'income' ? '+' : '-';
       const colorClass = tx.type === 'income' ? 'transaction-item__amount--income' : 'transaction-item__amount--expense';
+
+      const displayLabel = isDebt ? (tx.comment || cat.name) : cat.name;
+      const displayMeta = isDebt ? cat.name : (tx.comment || '');
 
       item.innerHTML = `
         <div class="transaction-item__main">
           <span class="transaction-item__icon">${cat.icon}</span>
           <div class="transaction-item__info">
-            <span class="transaction-item__category">${cat.name}</span>
-            <span class="transaction-item__meta">${tx.comment || ''}</span>
+            <span class="transaction-item__category">${displayLabel}</span>
+            <span class="transaction-item__meta">${displayMeta}</span>
           </div>
           <span class="transaction-item__amount ${colorClass}">${sign}${formatMoney(tx.amount)}</span>
         </div>
         <div class="transaction-item__actions">
-          <button class="btn-edit" data-id="${tx.id}">Редактировать</button>
-          <button class="btn-delete" data-id="${tx.id}">Удалить</button>
+          <button class="btn-edit" data-id="${tx.id}"${isDebt ? ' data-debt-id="' + tx.debt_id + '"' : ''}>Редактировать</button>
+          <button class="btn-delete" data-id="${tx.id}"${isDebt ? ' disabled title="Удалите через вкладку Долги"' : ''}>Удалить</button>
         </div>
       `;
 
