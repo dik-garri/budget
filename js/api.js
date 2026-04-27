@@ -52,6 +52,13 @@ const API = (() => {
     addCategory: (cat) => post({ action: 'addCategory', ...cat }),
     addTransaction: (tx) => post({ action: 'addTransaction', ...tx }),
     editTransaction: (tx) => post({ action: 'editTransaction', ...tx }),
-    deleteTransaction: (id) => post({ action: 'deleteTransaction', id })
+    deleteTransaction: (id) => post({ action: 'deleteTransaction', id }),
+    getDebts: () => get({ action: 'debts' }),
+    getDebtPayments: (debtId) => get({ action: 'debtPayments', debt_id: debtId }),
+    addDebt: (debt) => post({ action: 'addDebt', ...debt }),
+    editDebt: (debt) => post({ action: 'editDebt', ...debt }),
+    deleteDebt: (id) => post({ action: 'deleteDebt', id }),
+    addDebtPayment: (payment) => post({ action: 'addDebtPayment', ...payment }),
+    deleteDebtPayment: (id) => post({ action: 'deleteDebtPayment', id })
   };
 })();
