@@ -32,6 +32,12 @@ function doGet(e) {
       case 'summary':
         result = getSummary(parseInt(e.parameter.months) || 6, e.parameter.user);
         break;
+      case 'debts':
+        result = getDebts();
+        break;
+      case 'debtPayments':
+        result = getDebtPayments(e.parameter.debt_id);
+        break;
       default:
         result = { status: 'error', message: 'Unknown action: ' + action };
     }
@@ -65,7 +71,8 @@ function getTransactions(month, user) {
     type: row[3],
     category: row[4],
     user: row[5],
-    comment: row[6] || ''
+    comment: row[6] || '',
+    debt_id: row[7] || ''
   }));
 
   return { status: 'ok', data: transactions };
@@ -131,6 +138,55 @@ function getSummary(months, user) {
 
   const sorted = Object.values(summaryByMonth).sort((a, b) => a.month.localeCompare(b.month));
   return { status: 'ok', data: sorted };
+}
+
+function getDebts() {
+  const debtsSheet = getSheet('Debts');
+  const paymentsSheet = getSheet('DebtPayments');
+
+  const debtRows = debtsSheet.getDataRange().getValues().slice(1);
+  const paymentRows = paymentsSheet.getDataRange().getValues().slice(1);
+
+  const paidByDebt = {};
+  paymentRows.forEach(row => {
+    const debtId = row[1];
+    paidByDebt[debtId] = (paidByDebt[debtId] || 0) + Number(row[2] || 0);
+  });
+
+  const debts = debtRows.map(row => {
+    const id = row[0];
+    const amount = Number(row[3]);
+    const paid = paidByDebt[id] || 0;
+    return {
+      id: id,
+      counterparty: row[1],
+      type: row[2],
+      amount: amount,
+      date: formatDate(row[4]),
+      comment: row[5] || '',
+      paid: paid,
+      status: paid >= amount ? 'closed' : 'active'
+    };
+  });
+
+  return { status: 'ok', data: debts };
+}
+
+function getDebtPayments(debtId) {
+  const sheet = getSheet('DebtPayments');
+  const rows = sheet.getDataRange().getValues().slice(1);
+
+  const filtered = rows
+    .filter(row => row[1] === debtId)
+    .map(row => ({
+      id: row[0],
+      debt_id: row[1],
+      amount: Number(row[2]),
+      date: formatDate(row[3]),
+      comment: row[4] || ''
+    }));
+
+  return { status: 'ok', data: filtered };
 }
 
 function doPost(e) {
