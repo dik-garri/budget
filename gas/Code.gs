@@ -216,6 +216,9 @@ function doPost(e) {
       case 'addDebt':
         result = addDebt(body);
         break;
+      case 'editDebt':
+        result = editDebt(body);
+        break;
       default:
         result = { status: 'error', message: 'Unknown action: ' + body.action };
     }
@@ -225,6 +228,57 @@ function doPost(e) {
 
   return ContentService.createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function editDebt(body) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(5000);
+  try {
+    const amount = Number(body.amount);
+    if (!(amount > 0)) {
+      return { status: 'error', message: 'Amount must be > 0' };
+    }
+    if (body.type !== 'lent' && body.type !== 'borrowed') {
+      return { status: 'error', message: 'Invalid type' };
+    }
+
+    const counterparty = String(body.counterparty || '').trim().substring(0, 50);
+    if (!counterparty) {
+      return { status: 'error', message: 'Counterparty required' };
+    }
+    const comment = String(body.comment || '').substring(0, 100);
+
+    const debtsSheet = getSheet('Debts');
+    const debtsData = debtsSheet.getDataRange().getValues();
+    let debtRow = -1;
+    for (let i = 1; i < debtsData.length; i++) {
+      if (debtsData[i][0] === body.id) { debtRow = i + 1; break; }
+    }
+    if (debtRow === -1) return { status: 'error', message: 'Debt not found' };
+
+    debtsSheet.getRange(debtRow, 2).setValue(counterparty);
+    debtsSheet.getRange(debtRow, 3).setValue(body.type);
+    debtsSheet.getRange(debtRow, 4).setValue(amount);
+    debtsSheet.getRange(debtRow, 5).setValue(body.date);
+    debtsSheet.getRange(debtRow, 6).setValue(comment);
+
+    const txSheet = getSheet('Transactions');
+    const txData = txSheet.getDataRange().getValues();
+    for (let i = 1; i < txData.length; i++) {
+      if (txData[i][0] === body.id) {
+        const txType = body.type === 'lent' ? 'expense' : 'income';
+        txSheet.getRange(i + 1, 2).setValue(body.date);
+        txSheet.getRange(i + 1, 3).setValue(amount);
+        txSheet.getRange(i + 1, 4).setValue(txType);
+        txSheet.getRange(i + 1, 7).setValue(counterparty);
+        break;
+      }
+    }
+
+    return { status: 'ok' };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function ensureDebtsCategory() {
