@@ -69,6 +69,8 @@ For debt-derived rows:
   - For `Debt(type=borrowed)` creation → `income` (money arrives in my wallet).
   - For `DebtPayment` of a `borrowed` debt → `expense` (money leaves my wallet).
 - `Transactions.comment` = the `counterparty` name (for readability in History feed: "🤝 Маша −5000").
+- `Transactions.user` = `""` (single-family mode — multi-user was removed in commit `ed1ad66`).
+- `Transactions.amount` for debt-creation rows always equals `Debts.amount` (the original debt). Repayments live exclusively in `DebtPayments` and their own `Transactions` rows; the debt-creation transaction is never reduced as payments come in.
 
 ### Auto-managed category
 
@@ -76,7 +78,7 @@ On the first `addDebt` call (or via lazy creation), GAS ensures the `Categories`
 - `(name="Долги", type="expense", icon="🤝")`
 - `(name="Долги", type="income", icon="🤝")`
 
-The frontend hides the "Долги" category from the regular add-transaction `category-grid` to prevent users from creating orphan debt-categorized transactions outside the Debts flow.
+The frontend hides the "Долги" category from the regular add-transaction `category-grid` to prevent users from creating orphan debt-categorized transactions outside the Debts flow. `getCategories` on the server returns all categories unfiltered (including "Долги") — the filtering is purely a frontend concern, since the Debts tab itself needs the category-grid in its bottom-sheet to be aware of the icon.
 
 ## API (GAS endpoints)
 
@@ -93,7 +95,7 @@ All write endpoints use `LockService` and run their multi-row writes atomically 
   → Lock. Append to `Debts`. Append to `Transactions` (using the same `id`, `debt_id = id`, type/category as defined above). Ensure "Долги" category exists in `Categories`.
 
 - `editDebt({ id, counterparty, type, amount, date, comment })`
-  → Lock. Update row in `Debts`. Find row in `Transactions` where `id == body.id` and update its `amount`, `date`, `type` (in case `type` changed: `lent` ↔ `borrowed` flips expense/income), `comment` (= counterparty).
+  → Lock. Update row in `Debts` (all fields: `counterparty`, `type`, `amount`, `date`, `comment`). Find row in `Transactions` where `id == body.id` and overwrite its `amount` (= new `Debts.amount`, always — does not subtract payments), `date`, `type` (`lent` → `expense`, `borrowed` → `income`), `comment` (= new `counterparty`). The `Debts` row's own `comment` field is independent from the `Transactions.comment` (which always holds the counterparty).
 
 - `deleteDebt({ id })`
   → Lock.
