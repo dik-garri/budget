@@ -247,6 +247,9 @@ function addDebtPayment(body) {
     if (!(amount > 0)) {
       return { status: 'error', message: 'Amount must be > 0' };
     }
+    if (!body.id) return { status: 'error', message: 'id required' };
+    if (!body.debt_id) return { status: 'error', message: 'debt_id required' };
+    if (!body.date) return { status: 'error', message: 'date required' };
 
     const debtsSheet = getSheet('Debts');
     const debtsData = debtsSheet.getDataRange().getValues();
@@ -322,6 +325,9 @@ function deleteDebt(body) {
   const lock = LockService.getScriptLock();
   lock.waitLock(5000);
   try {
+    // Cascade delete: remove all Transactions whose debt_id (column 8) references this debt.
+    // Invariant: every debt-derived Transactions row is written with debt_id set; addDebt
+    // and addDebtPayment maintain this. Iterating bottom-up to avoid index shift.
     const txSheet = getSheet('Transactions');
     const txData = txSheet.getDataRange().getValues();
     for (let i = txData.length - 1; i >= 1; i--) {
@@ -423,6 +429,8 @@ function addDebt(body) {
     if (body.type !== 'lent' && body.type !== 'borrowed') {
       return { status: 'error', message: 'Invalid type' };
     }
+    if (!body.id) return { status: 'error', message: 'id required' };
+    if (!body.date) return { status: 'error', message: 'date required' };
 
     ensureDebtsCategory();
 
